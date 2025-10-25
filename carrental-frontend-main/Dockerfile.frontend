@@ -1,0 +1,30 @@
+# ---------- Build stage ----------
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Install git to clone your repository
+RUN apk add --no-cache git
+
+# ✅ Clone your repo and move into frontend directory
+RUN git clone https://github.com/yashitha-05/s201-insem1-2300030531.git .
+WORKDIR /app/carrental-frontend-main
+
+# Install dependencies and build
+RUN npm install
+RUN npm run build
+
+# ---------- Run stage ----------
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+
+# Copy custom nginx config (for React routing + backend proxy)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built frontend files from builder
+COPY --from=builder /app/carrental-frontend-main/dist ./
+
+# Expose port 80
+EXPOSE 80
+
+# Start NGINX
+CMD ["nginx", "-g", "daemon off;"]

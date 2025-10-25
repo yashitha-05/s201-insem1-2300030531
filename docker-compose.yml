@@ -1,0 +1,40 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: Yashitha@2005
+      MYSQL_DATABASE: travel_db
+    ports:
+      - "3306:3306"
+    networks:
+      - carrental-net
+
+  backend:
+    build:
+      context: ./carrental-backend-main
+      dockerfile: Dockerfile.backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/travel_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Yashitha@2005
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+    networks:
+      - carrental-net
+
+  frontend:
+    build:
+      context: ./carrental-frontend-main
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - carrental-net
+
+networks:
+  carrental-net:
+    driver: bridge
